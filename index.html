@@ -1,0 +1,77 @@
+<html>
+<head>
+  <title>AmBehance</title>
+
+  <link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.3.0/base-min.css">
+
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    window.onload = function() {
+
+      var progress = document.getElementById("button");
+
+      var socket = io.connect('http://localhost');
+      socket.on('news', function (data) {
+        console.log(data);
+        socket.emit('my other event', { my: 'data' });
+      });
+
+      socket.on('cover', function (data) {
+        console.log(data);
+
+        var img = $('<img id="dynamic">'); //Equivalent: $(document.createElement('img'))
+        img.attr( 'src', data.cover );
+        img.appendTo('#imagediv').fadeIn();
+
+      });
+
+      progress.onclick = function() {
+        socket.emit("click", {'color' : document.getElementById("color").value });
+        $('#imagediv').html('');
+      }
+
+    } // window onload
+  </script>
+
+  <style type="text/css">
+    body{
+      background-color:black;
+    }
+    img{
+      display:inline;
+    }
+    #header {
+      position:absolute;
+      top:0;
+      left:0;
+      z-index:1;
+      padding:12px;
+    }
+    #imagediv {
+      width:100%;
+      height:100%;
+      position:absolute;
+      top:0;
+      left:0;
+      z-index:0;
+    }
+  </style>
+
+</head>
+<body>
+
+  <div id="header">
+    <form>
+      <input type="text" name="color" id ="color">
+      <input type="button" value="go" id="button"/>
+    </form>
+  </div>
+
+  <h1>AmBehance</h1>
+
+
+  <div id="imagediv"></div>
+
+</body>
+</html>
