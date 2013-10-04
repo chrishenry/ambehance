@@ -6,10 +6,12 @@
 
   <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
   <script src="/socket.io/socket.io.js"></script>
+  <script src="/javascripts/colors.js"></script>
   <script>
     window.onload = function() {
 
       var progress = document.getElementById("button");
+      var rotate = document.getElementById("rotate");
 
       var socket = io.connect('http://localhost');
       socket.on('news', function (data) {
@@ -18,7 +20,6 @@
       });
 
       socket.on('cover', function (data) {
-        console.log(data);
 
         var img = $('<img id="dynamic">'); //Equivalent: $(document.createElement('img'))
         img.attr( 'src', data.cover );
@@ -29,6 +30,24 @@
       progress.onclick = function() {
         socket.emit("click", {'color' : document.getElementById("color").value });
         $('#imagediv').html('');
+      }
+
+      $(document).keypress(function(e){
+          if (e.which == 13){
+              progress.click();
+              progress.blur();
+              return false;
+          }
+      });
+
+      rotate.onclick = function() {
+        rotateColors();
+      }
+
+      function rotateColors() {
+        $('#imagediv').html('');
+        socket.emit("click", {'color' : colors[ Math.floor(Math.random()*colors.length) ] });
+        setTimeout(rotateColors, 12000);
       }
 
     } // window onload
@@ -65,11 +84,11 @@
     <form>
       <input type="text" name="color" id ="color">
       <input type="button" value="go" id="button"/>
+      <input type="button" value="rotate" id="rotate"/>
     </form>
   </div>
 
   <h1>AmBehance</h1>
-
 
   <div id="imagediv"></div>
 

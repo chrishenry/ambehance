@@ -63,6 +63,8 @@ io.sockets.on('connection', function (socket) {
 
     var color = new Chromath(data.color);
 
+    console.log(color);
+
     var displayResult = function(result) {
         console.log("RES: " + JSON.stringify(result, null, 2));
     };
@@ -75,9 +77,11 @@ io.sockets.on('connection', function (socket) {
         lightState = hue.lightState;
 
     var api = new HueApi(app.get('hue_ip'), app.get('hue_username')),
-        state = lightState.create().on().rgb( color.r, color.g, color.b );
+        state = lightState.create().on().rgb( color.r, color.g, color.b ).transition(2).brightness(100);
 
-    var url = 'http://www.behance.net/v2/projects?color_range=14&color_hex=' + color.hex().join('') + key;
+    var page = Math.floor(Math.random()*10);
+
+    var url = 'http://www.behance.net/v2/projects?color_range=20&page=' + page + '&color_hex=' + color.hex().join('') + key;
 
     request({uri: url}, function(err, response, body) {
 
@@ -89,16 +93,20 @@ io.sockets.on('connection', function (socket) {
       api_resp = JSON.parse(response.body);
 
       api_resp.projects.forEach(function(item){
-        socket.emit( 'cover', { 'cover' : ( item.covers['404'] ) ? item.covers['404'] : item.covers['202'] } );
+        setTimeout(function(){
+          socket.emit( 'cover', { 'cover' : ( item.covers['404'] ) ? item.covers['404'] : item.covers['202'] } );
+        }, Math.floor((Math.random()*4000)+1)  );
       });
 
     });
 
     for (var i=1;i<=3;i++) {
-      api.setLightState(i, state)
-          .then(displayResult)
-          .fail(displayError)
-          .done();
+      setImmediate(function(i){
+        api.setLightState(i, state)
+            .then(displayResult)
+            .fail(displayError)
+            .done();
+      }, [i]);
     }
 
   });
